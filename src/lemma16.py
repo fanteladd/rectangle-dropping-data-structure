@@ -12,8 +12,8 @@ def onClick(event):
     global pause
     pause ^= True
 
-def lemma16(skyline, w, s, ax):
 
+def lemma16(skyline, w, s, ax):
     width_left = FastAVLTree()
     width_right = FastAVLTree()
     width_vertices = FastAVLTree()
@@ -34,7 +34,7 @@ def lemma16(skyline, w, s, ax):
             x_i = x_start
             x_f = v.x
             width = x_f - x_i
-            p1.remove()
+            p2 = ax.scatter(0, h, s=100, marker="^", color="red")
         else:
             x_i = u.x
             x_f = v.x
@@ -44,16 +44,14 @@ def lemma16(skyline, w, s, ax):
             while pause:
                 plt.pause(0.1)
             plt.pause(s)
-            p2.remove()
-            p1.remove()
 
         ar = ax.annotate(
             text="",
-            xy=(x_i, h + 0.2),
-            xytext=(x_f, h + 0.2),
+            xy=(x_i, h + 0.3),
+            xytext=(x_f, h + 0.3),
             arrowprops=dict(arrowstyle="<->", color="blue"),
         )
-        text = ax.annotate(text=str(width), xy=((width / 2) + x_i, h + 0.3))
+        text = ax.annotate(text=str(width), xy=((width / 2) + x_i, h + 0.4))
         width_left[(v.x, h)] = (x_i, x_f, width, ar, text)
         plt.pause(s)
         while pause:
@@ -61,6 +59,8 @@ def lemma16(skyline, w, s, ax):
         plt.pause(s)
         ar.remove()
         text.remove()
+        p2.remove()
+        p1.remove()
 
         visited.append(v)
 
@@ -75,7 +75,6 @@ def lemma16(skyline, w, s, ax):
     for r in todraw_left:
         ax.add_artist(todraw_left[r][3])
         ax.add_artist(todraw_left[r][4])
-    
 
     visited = []
     for v in reversed(skyline):
@@ -153,7 +152,7 @@ def lemma16(skyline, w, s, ax):
         x_f = t[1]
         width = t[2]
         width_vertices[key] = (x_i, x_f, width)
-        
+
     plt.pause(1)
     for key in width_vertices:
         h = key[1]
@@ -168,7 +167,7 @@ def lemma16(skyline, w, s, ax):
                 arrowprops=dict(arrowstyle="<->", color="red"),
             )
             text = ax.annotate(text=str(width), xy=((width / 2) + x_i, h + 0.3))
-            width_heights[h] = (x_i,x_f,width,ar,text)
+            width_heights[h] = (x_i, x_f, width, ar, text)
         if width_vertices[key][2] > width_heights[h][2]:
             width_heights[h][3].remove()
             width_heights[h][4].remove()
@@ -182,7 +181,7 @@ def lemma16(skyline, w, s, ax):
                 arrowprops=dict(arrowstyle="<->", color="red"),
             )
             text = ax.annotate(text=str(width), xy=((width / 2) + x_i, h + 0.3))
-            width_heights[h] = (x_i,x_f,width,ar,text)
+            width_heights[h] = (x_i, x_f, width, ar, text)
 
     plt.pause(2)
     plt.pause(s)
@@ -190,7 +189,7 @@ def lemma16(skyline, w, s, ax):
         plt.pause(0.1)
     plt.pause(s)
 
-    heights = list(width_heights.keys())  
+    heights = list(width_heights.keys())
     print(heights)
     prec_h = heights[0]
 
@@ -241,22 +240,22 @@ def bsearchinterval(x, intervals):
     # was not present
     return 0
 
+
 if __name__ == "__main__":
-    fig, ax = plt.subplots(1, 1,figsize=(15, 15))
-    fig.canvas.mpl_connect('button_press_event', onClick)
+    fig, ax = plt.subplots(1, 1, figsize=(15, 15))
+    fig.canvas.mpl_connect("button_press_event", onClick)
     ax.set_aspect("equal", adjustable="box")
     rectangles = [
-        rdds.Rectangle(0, 3, 2, 0),
-        rdds.Rectangle(0, 1, 3, 2),
-        rdds.Rectangle(1, 2, 6, 2),
-        rdds.Rectangle( 3, 6, 5, 0),
-        rdds.Rectangle( 4, 6, 5, 5),
-        rdds.Rectangle( 5, 6, 2, 10),
-        rdds.Rectangle( 6, 9, 6, 0),
-        rdds.Rectangle( 7, 8, 3, 6),
-        rdds.Rectangle( 8, 9, 2, 6),
+        rdds.Rectangle(1, 3, 1, 0),
+        rdds.Rectangle(1, 2, 2, 1),
+        rdds.Rectangle(3, 6, 3, 0),
+        rdds.Rectangle(4, 6, 3, 3),
+        rdds.Rectangle(5, 6, 1, 6),
+        rdds.Rectangle(6, 9, 4, 0),
+        rdds.Rectangle(7, 8, 2, 4),
+        rdds.Rectangle(8, 9, 1, 4),
     ]
-    rdds = rdds.RDDS(9,rectangles)
+    rdds = rdds.RDDS(10, rectangles)
     ax.plot([0, 0], [0, 15], color="black")
     listrect = []
     for rect in rdds.rectangles:
@@ -267,5 +266,5 @@ if __name__ == "__main__":
     for r in listrect:
         r.remove()
     plt.pause(3)
-    data = lemma16(rdds.skyline,rdds.width,0.7,ax)
+    data = lemma16(rdds.skyline, rdds.width, 0.7, ax)
     print("data", data)

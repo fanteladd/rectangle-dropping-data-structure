@@ -17,13 +17,13 @@ from collections import namedtuple
 pause = False
 
 
-def onClick(event,ax):
+def onClick(event, ax):
     global pause
     pause ^= True
     if pause == True:
-        ax.scatter(0,0,s=20,marker="o",color="red")
+        ax.scatter(0, 0, s=20, marker="o", color="red")
     else:
-        ax.scatter(0,0,s=25,marker="o",color="white")
+        ax.scatter(0, 0, s=25, marker="o", color="white")
 
 
 def ppause(s):
@@ -278,7 +278,11 @@ class RDDS:
         return self.heights[i], x_d
 
     def insert(self, width: int, height: int, x_d: int, ax, s, color):
-        sg = displaySkyline(self.skyline,ax)
+        sg = displaySkyline(self.skyline, ax)
+        seg = []
+        r1, r2, r3, r4 = []
+        stair1, stair2 = []
+
         ppause(s)
         if s != 0:
             seg = self.displayChunks(ax)
@@ -312,14 +316,12 @@ class RDDS:
         for i in range(n):
             if i == 0 and x_i < self.chunks[i].skyline[-1].x:
                 p1 = i
-                # print(f"chunk iniziale: {p1}")
                 break
             if (
                 x_i >= self.chunks[i].skyline[0].x
                 and x_i < self.chunks[i].skyline[-1].x
             ):
                 p1 = i
-                # print(f"chunk iniziale: {p1}")
                 break
 
         pointer1 = ax.annotate(
@@ -343,7 +345,6 @@ class RDDS:
                 and x_f >= self.chunks[i].skyline[0].x
             ):
                 p2 = i
-                # print(f"chunk finale: {p2}")
                 break
             else:
                 if p1 != i:
@@ -382,6 +383,7 @@ class RDDS:
             ppause(s)
 
             # inseriamo blocco
+            del_sin = bisect_right(vertices, x_i, key=lambda v: v.x)
             if del_sin > 1 and vertices[del_sin - 1].x == x_i:
                 del_sin -= 1
 
@@ -389,23 +391,23 @@ class RDDS:
             vertices.insert(del_sin, Vertex(x_i, vertices[del_sin - 1].y))
 
             if p > 0:
-                self.chunks[p-1].skyline[-1] = vertices[0]
+                self.chunks[p - 1].skyline[-1] = vertices[0]
 
-            if del_des < len(vertices)-1 and vertices[del_des].x == x_f:
+            del_des = bisect_left(vertices, x_f, key=lambda v: v.x)
+            if del_des < len(vertices) - 1 and vertices[del_des].x == x_f:
                 del_des += 1
             else:
                 del_des -= 1
 
-            if del_des == len(vertices)-1:
+            if del_des == len(vertices) - 1:
                 vertices.insert(del_des + 1, Vertex(x_f, vertices[del_des].y))
                 vertices.insert(del_des + 1, Vertex(x_f, height_pos + height))
             else:
-                vertices.insert(del_des + 1, Vertex(x_f, vertices[del_des+1].y))
+                vertices.insert(del_des + 1, Vertex(x_f, vertices[del_des + 1].y))
                 vertices.insert(del_des + 1, Vertex(x_f, height_pos + height))
 
-
-            if p < len(self.chunks)-1:
-                self.chunks[p+1].skyline[0] = vertices[-1]
+            if p < len(self.chunks) - 1:
+                self.chunks[p + 1].skyline[0] = vertices[-1]
 
             vertices[del_sin + 2 : del_des + 1] = []
 
@@ -481,19 +483,24 @@ class RDDS:
             # inseriamo blocco
             left_chunk_skyline = self.chunks[p1].skyline
             del_sin = bisect_right(left_chunk_skyline, x_i, key=lambda v: v.x)
-            if del_sin > 0 and left_chunk_skyline[del_sin-1].x == x_i:
+            if del_sin > 0 and left_chunk_skyline[del_sin - 1].x == x_i:
                 del_sin = del_sin - 2
             self.chunks[p1].skyline = left_chunk_skyline[:del_sin]
 
             right_chunk_skyline = self.chunks[p2].skyline
             del_des = bisect_left(right_chunk_skyline, x_f, key=lambda v: v.x)
-            if del_des < len(right_chunk_skyline)-2 and right_chunk_skyline[del_des].x == x_f:
+            if (
+                del_des < len(right_chunk_skyline) - 2
+                and right_chunk_skyline[del_des].x == x_f
+            ):
                 del_des = del_des + 2
             self.chunks[p2].skyline = right_chunk_skyline[del_des:]
 
             left_chunk_skyline = self.chunks[p1].skyline
             if not left_chunk_skyline:
-                left_chunk_skyline.append(Vertex(x_i, self.chunks[p1-1].skyline[-2].y))
+                left_chunk_skyline.append(
+                    Vertex(x_i, self.chunks[p1 - 1].skyline[-2].y)
+                )
             else:
                 left_chunk_skyline.append(Vertex(x_i, self.chunks[p1].skyline[-1].y))
             left_chunk_skyline.append(Vertex(x_i, height_pos + height))
@@ -508,10 +515,10 @@ class RDDS:
             p2 = p1 + 1
 
             if p1 > 0:
-                self.chunks[p1-1].skyline[-1] = self.chunks[p1].skyline[0]
+                self.chunks[p1 - 1].skyline[-1] = self.chunks[p1].skyline[0]
 
-            if p2 < len(self.chunks)-1:
-                self.chunks[p2+1].skyline[0] = self.chunks[p2].skyline[-1]
+            if p2 < len(self.chunks) - 1:
+                self.chunks[p2 + 1].skyline[0] = self.chunks[p2].skyline[-1]
 
             # now rebuild chunk p1 and p2
             self.chunks[p1] = Chunk(self.chunks[p1].skyline)
@@ -544,7 +551,6 @@ class RDDS:
             stair1[0].remove()
             stair2[0].remove()
 
-
         ppause(s)
 
         # ricostruzione struttura dati
@@ -557,15 +563,15 @@ class RDDS:
             self.removeChunks(seg)
             seg = self.displayChunks(ax)
         p2 = p1
-        p1 = p1-1
-        end = p2+3
+        p1 = p1 - 1
+        end = p2 + 3
 
         self.skyline = []
         for chunk in self.chunks:
             self.skyline += chunk.skyline
         ppause(s)
-        eraseSkyline(sg,ax)
-        sg = displaySkyline(self.skyline,ax)
+        eraseSkyline(sg, ax)
+        sg = displaySkyline(self.skyline, ax)
 
         while p2 < end:
             pointer1 = ax.annotate(
@@ -586,12 +592,14 @@ class RDDS:
             ppause(s)
             if len(self.chunks[p1].skyline) > size:
                 if s != 0:
-                    l = ax.annotate(text="split", xy=(self.chunks[p1].skyline[0].x + 5, 18) )
+                    l = ax.annotate(
+                        text="split", xy=(self.chunks[p1].skyline[0].x + 5, 18)
+                    )
                     ppause(s)
                     self.removeChunks(seg)
 
                 half = int(len(self.chunks[p1].skyline) / 2)
-                skyline1 = self.chunks[p1].skyline[:half+1]
+                skyline1 = self.chunks[p1].skyline[: half + 1]
                 skyline2 = self.chunks[p1].skyline[half:]
                 del self.chunks[p1]
                 chunk = Chunk(skyline2)
@@ -604,7 +612,10 @@ class RDDS:
             if len(self.chunks[p1].skyline) + len(self.chunks[p2].skyline) < minsize:
                 if s != 0:
                     self.removeChunks(seg)
-                    l = ax.annotate(text="merge p1 and p2", xy=(self.chunks[p1].skyline[0].x + 5, 18) )
+                    l = ax.annotate(
+                        text="merge p1 and p2",
+                        xy=(self.chunks[p1].skyline[0].x + 5, 18),
+                    )
                     ppause(s)
                 skyline = self.chunks[p1].skyline + self.chunks[p1].skyline[1:]
                 del self.chunks[p1]
@@ -614,7 +625,7 @@ class RDDS:
                 if s != 0:
                     seg = self.displayChunks(ax)
                     l.remove()
-            if p2 == len(self.chunks)-1:
+            if p2 == len(self.chunks) - 1:
                 break
             p1 = p2
             p2 += 1
@@ -625,10 +636,9 @@ class RDDS:
         for chunk in self.chunks:
             self.skyline += chunk.skyline
         ppause(s)
-        eraseSkyline(sg,ax)
+        eraseSkyline(sg, ax)
         if s != 0:
             self.removeChunks(seg)
-
 
     def displayChunks(self, ax):
         seg = []
@@ -642,80 +652,6 @@ class RDDS:
     def removeChunks(self, seg):
         for i in seg:
             i[0].remove()
-
-
-def lemma16_legacy(skyline):
-    width_left = FastAVLTree()
-    width_right = FastAVLTree()
-    data_final = FastAVLTree()
-    w = skyline[-1][0]
-    visited = []
-    x_start = skyline[0][0]
-
-    for v in skyline:
-        u = findNearest(v, visited)
-        if u == None:
-            x_f = v[0]
-            x_i = x_start
-            width = x_f - x_i
-        else:
-            x_i = u[0]
-            x_f = v[0]
-            width = x_f - x_i
-
-        if not v[1] in width_left:
-            width_left[v[1]] = (x_i, x_f, width)
-
-        if width_left[v[1]][2] < width:
-            width_left[v[1]] = (x_i, x_f, width)
-
-        visited.append(v)
-
-    visited = []
-    for v in reversed(skyline):
-        u = findNearest(v, visited)
-        if u == None:
-            x_i = v[0]
-            x_f = w
-            width = x_f - x_i
-        else:
-            x_i = v[0]
-            x_f = u[0]
-            width = x_f - x_i
-
-        if not v[1] in width_right:
-            width_right[v[1]] = (x_i, x_f, width)
-
-        if width_right[v[1]][2] < width:
-            width_right[v[1]] = (x_i, x_f, width)
-        visited.append(v)
-
-    for h in width_right:
-        t = width_right[h]
-        x_i = t[0]
-        x_f = t[1]
-        width = t[2]
-        width_right[h] = (x_i, x_f, width)
-
-    for h in width_right:
-        if width_left[h][1] >= width_right[h][0]:
-            x_i = width_left[h][0]
-            x_f = width_right[h][1]
-            width = x_f - x_i
-            data_final[h] = (x_i, x_f, width)
-        else:
-            if width_left[h][2] >= width_right[h][2]:
-                data_final[h] = width_left[h]
-            else:
-                data_final[h] = width_right[h]
-
-    for h1 in data_final:
-        for h2 in data_final:
-            if h2 < h1:
-                if data_final[h2][2] > data_final[h1][2]:
-                    data_final[h1] = data_final[h2]
-
-    return data_final
 
 
 def drawLine(x_i, x_f, h, ax, color="blue"):
@@ -745,18 +681,14 @@ def bsearch_staircase(h, staircase):
 
     while l <= r:
         mid = l + (r - l) // 2
-        # Check if x in mid interval
+
         if h >= staircase[mid][1] and h < staircase[mid][2]:
             return staircase[mid]
 
-        # If x is greater, ignore left half
         elif h >= staircase[mid][2]:
             l = mid + 1
 
-        # If x is smaller, ignore right half
         else:
             r = mid - 1
 
-    # If we reach here, then the element
-    # was not present
     return 0

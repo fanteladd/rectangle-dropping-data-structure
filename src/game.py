@@ -39,15 +39,15 @@ if __name__ == "__main__":
     seg = displaySkyline(rdds1.skyline, ax)
 
     insert = [
-        Rectangle(10, 20, 2, 31, "purple"),
-        Rectangle(10, 13, 3, 30, "blue"),
-        Rectangle(10, 13, 7, 26, "green"),
-        Rectangle(10, 15, 3, 30, "red"),
-        Rectangle(10, 12, 3, 30, "orange"),
-        Rectangle(10, 14, 1, 32, "cyan"),
+        Rectangle(10, 20, 2, 22, "purple"),
+        Rectangle(10, 13, 3, 21, "blue"),
+        Rectangle(10, 13, 7, 17, "green"),
+        Rectangle(10, 15, 3, 21, "red"),
+        Rectangle(10, 12, 3, 21, "orange"),
+        Rectangle(10, 14, 1, 23, "cyan"),
     ]
 
-    plt.pause(10)
+    # plt.pause(10)
 
     i = 0 
     for c in rdds1.chunks:
@@ -76,7 +76,7 @@ if __name__ == "__main__":
             for v in c.skyline:
                 print(f"x: {v.x}, y: {v.y}")
             i+=1
-        plt.pause(2)
+        plt.pause(3)
 
     # rect = Rectangle(10,13,2,30,"green")
     # r = rect.draw(ax)

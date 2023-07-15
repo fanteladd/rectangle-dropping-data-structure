@@ -43,7 +43,7 @@ if __name__ == "__main__":
     plt.pause(3)
     for r in listrect:
         r.remove()
-    rdds.insert(20,3,8,ax,1,"blue")
+    rdds.insert(20,3,8,ax,2,"blue")
     # plt.pause(2)
     # eraseSkyline(seg,ax)
     # seg = displaySkyline(rdds.skyline, ax)
