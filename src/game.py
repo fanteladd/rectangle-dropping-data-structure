@@ -36,15 +36,21 @@ if __name__ == "__main__":
     ax.plot([rdds1.width, rdds1.width], [0, 25], color="black")
     for rect in rdds1.rectangles:
         rect.draw(ax)
-    seg = displaySkyline(rdds1.skyline, ax)
+    # seg = displaySkyline(rdds1.skyline, ax)
 
     insert = [
-        Rectangle(10, 20, 2, 22, "purple"),
         Rectangle(10, 13, 3, 21, "blue"),
         Rectangle(10, 13, 7, 17, "green"),
         Rectangle(10, 15, 3, 21, "red"),
+        Rectangle(10, 20, 2, 22, "purple"),
         Rectangle(10, 12, 3, 21, "orange"),
-        Rectangle(10, 14, 1, 23, "cyan"),
+        Rectangle(10, 12, 2, 23, "cyan"),
+        Rectangle(10, 16, 4, 19, "yellow"),
+        Rectangle(10, 18, 2, 21, "salmon"),
+        Rectangle(10, 13, 3, 21, "pink"),
+        Rectangle(10, 12, 7, 17, "grey"),
+        Rectangle(10, 13, 1, 21, "darkblue"),
+        Rectangle(10, 13, 4, 21, "darkorange"),
     ]
 
     # plt.pause(10)
@@ -67,8 +73,8 @@ if __name__ == "__main__":
         rdds1.insert(width, height, x_d, ax, 0, rect.color)
         for rect in rdds1.rectangles:
             rect.draw(ax)
-        eraseSkyline(seg, ax)
-        seg = displaySkyline(rdds1.skyline, ax)
+        # eraseSkyline(seg, ax)
+        # seg = displaySkyline(rdds1.skyline, ax)
         r.remove()
         i = 1
         for c in rdds1.chunks:

@@ -34,14 +34,17 @@ def ppause(s):
 class RDDS:
     def __init__(self, width, rectangles=[]):
         self.rectangles = rectangles
+        self.width = width
         self.skyline = []
         self.createSkyline()
-        self.width = width
         self.chunks = []
         self.heights = SortedSet()
         self.createchunks()
 
     def createSkyline(self):
+        if not self.rectangles:
+            self.skyline = [Vertex(0, 0), Vertex(self.width, 0)]
+            return 0
         rectangles = [rectangle.extend_bottom() for rectangle in self.rectangles]
         Point = namedtuple("Point", "id x h start")
         S = FastAVLTree()
@@ -88,6 +91,7 @@ class RDDS:
                     x_max = tup.x
 
         self.skyline = [Vertex(r[0], r[2]) for r in R]
+        return 0
 
     def createchunks(self):
         skyline = self.skyline[:]
@@ -112,7 +116,8 @@ class RDDS:
                 skyline = skyline[size:]
 
     def query_height(self, h, ax, s):
-        ax.get_yticklabels()[h].set_color("red")
+        if s != 0:
+            ax.get_yticklabels()[h].set_color("red")
         width = (0, 0, 0)
         ar = None
         text = None
@@ -257,7 +262,7 @@ class RDDS:
 
         pointer1.remove()
         pointer2.remove()
-        ax.get_yticklabels()[h].set_color("black")
+        # ax.get_yticklabels()[h].set_color("black")
 
         return width
 
@@ -280,12 +285,8 @@ class RDDS:
     def insert(self, width: int, height: int, x_d: int, ax, s, color):
         sg = displaySkyline(self.skyline, ax)
         seg = []
-        r1, r2, r3, r4 = []
-        stair1, stair2 = []
-
-        ppause(s)
-        if s != 0:
-            seg = self.displayChunks(ax)
+        r1, r2, r3, r4 = [], [], [], []
+        stair1, stair2 = [], []
 
         stair1 = []
         if s != 0:
@@ -293,6 +294,8 @@ class RDDS:
 
         x_i = x_d
         x_f = x_i + width
+
+        ppause(s)
 
         if s != 0:
             r1 = ax.plot([x_i, x_f], [20 + height, 20 + height], color="orange")
@@ -306,6 +309,9 @@ class RDDS:
             plt.pause(0.1)
 
         ppause(s)
+
+        if s != 0:
+            seg = self.displayChunks(ax)
 
         height_pos = 0
         covered = []
@@ -373,7 +379,8 @@ class RDDS:
             height_pos = max(vertices[del_sin : del_des + 1], key=attrgetter("y")).y
             self.heights.add(height_pos + height)
 
-            ax.get_yticklabels()[height_pos].set_color("red")
+            if s != 0:
+                ax.get_yticklabels()[height_pos].set_color("red")
 
             ppause(s)
 
@@ -419,7 +426,8 @@ class RDDS:
             if covered:
                 height_pos = max(covered, key=attrgetter("max_height")).max_height
 
-            ax.get_yticklabels()[height_pos].set_color("red")
+            if s != 0:
+                ax.get_yticklabels()[height_pos].set_color("red")
 
             ppause(s)
 
@@ -436,13 +444,6 @@ class RDDS:
             y_1i = staircase[i][1]
             y_1f = staircase[i][2]
             stair1 = ax.plot([x, x], [y_1i, y_1f], color="red", linestyle="dashed")
-
-            ppause(s)
-
-            while pause:
-                plt.pause(0.1)
-
-            ppause(s)
 
             if h > height_pos:
                 ax.get_yticklabels()[height_pos].set_color("black")
@@ -462,11 +463,6 @@ class RDDS:
             y_2i = staircase[j][1]
             y_2f = staircase[j][2]
             stair2 = ax.plot([x, x], [y_2i, y_2f], color="cyan", linestyle="dashed")
-
-            ppause(s)
-            while pause:
-                plt.pause(0.1)
-            ppause(s)
 
             if h > height_pos:
                 ax.get_yticklabels()[height_pos].set_color("black")
@@ -558,13 +554,17 @@ class RDDS:
         n = len(self.skyline)
         size = int(math.sqrt(n * math.log(n)))
         minsize = int(math.sqrt(n * math.log(n)) / 2)
+        print(f"size: {size}")
+        print(f"minsize: {minsize}")
 
         if s != 0:
             self.removeChunks(seg)
             seg = self.displayChunks(ax)
-        p2 = p1
-        p1 = p1 - 1
-        end = p2 + 3
+
+        end = p2 + 2
+        if p1 != 0:
+            p2 = p1
+            p1 = p1 - 1
 
         self.skyline = []
         for chunk in self.chunks:
@@ -574,18 +574,19 @@ class RDDS:
         sg = displaySkyline(self.skyline, ax)
 
         while p2 < end:
-            pointer1 = ax.annotate(
-                text="p1",
-                xy=(self.chunks[p1].skyline[0].x + 0.5, 15),
-                xytext=(self.chunks[p1].skyline[0].x + 1, 14),
-                arrowprops=dict(arrowstyle="<-", color="green"),
-            )
-            pointer2 = ax.annotate(
-                text="p2",
-                xy=(self.chunks[p2].skyline[0].x + 0.5, 15),
-                xytext=(self.chunks[p2].skyline[0].x + 1, 14),
-                arrowprops=dict(arrowstyle="<-", color="green"),
-            )
+            if s != 0:
+                pointer1 = ax.annotate(
+                    text="p1",
+                    xy=(self.chunks[p1].skyline[0].x + 0.5, 15),
+                    xytext=(self.chunks[p1].skyline[0].x + 1, 14),
+                    arrowprops=dict(arrowstyle="<-", color="green"),
+                )
+                pointer2 = ax.annotate(
+                    text="p2",
+                    xy=(self.chunks[p2].skyline[0].x + 0.5, 15),
+                    xytext=(self.chunks[p2].skyline[0].x + 1, 14),
+                    arrowprops=dict(arrowstyle="<-", color="green"),
+                )
             ppause(s)
             while pause:
                 plt.pause(0.1)
@@ -629,8 +630,9 @@ class RDDS:
                 break
             p1 = p2
             p2 += 1
-            pointer1.remove()
-            pointer2.remove()
+            if s != 0:
+                pointer1.remove()
+                pointer2.remove()
 
         self.skyline = []
         for chunk in self.chunks:
